@@ -4,6 +4,7 @@
 airflow_settings.yaml
 ngrok.yml
 backup.sql
+isrgrootx1.pem.txt
 __pycache__/
 astro
 .venv

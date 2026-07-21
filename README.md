@@ -109,9 +109,10 @@ Este projeto inclui configuração para [Dev Containers](https://code.visualstud
 2. Clique no ícone verde no canto inferior esquerdo (`><`)
 3. Selecione **Reopen in Container**
 4. O container será buildado a partir da imagem Astro Runtime com as extensões Python, Docker e Astro instaladas
-5. Após a inicialização, as dependências do `requirements.txt` serão instaladas automaticamente
+5. Após a inicialização, as dependências do `requirements.txt` e a Astro CLI serão instaladas automaticamente
+6. Execute `astro dev start` no terminal integrado para iniciar o Airflow localmente
 
-> O Dev Container monta o socket do Docker (`/var/run/docker.sock`) para que você possa executar comandos `astro dev start` diretamente do terminal do VS Code.
+> O Dev Container usa Docker-in-Docker, permitindo executar `astro dev start` diretamente no terminal integrado sem depender do socket Docker do host.
 
 ## Views Analíticas Disponíveis
 

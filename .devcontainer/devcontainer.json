@@ -4,6 +4,13 @@
         "dockerfile": "../Dockerfile",
         "context": ".."
     },
+    "features": {
+        // Allows `astro dev start` to run its local Airflow containers.
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {
+            "version": "latest",
+            "moby": false
+        }
+    },
     "customizations": {
         "vscode": {
             "extensions": [
@@ -24,9 +31,9 @@
     "containerEnv": {
         "AIRFLOW_HOME": "/usr/local/airflow"
     },
-    "postCreateCommand": "pip install -r requirements.txt",
-    "remoteUser": "astro",
-    "mounts": [
-        "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
-    ]
+    "remoteEnv": {
+        "PATH": "/home/astro/.local/bin:${containerEnv:PATH}"
+    },
+    "postCreateCommand": "pip install -r requirements.txt && mkdir -p /home/astro/.local/bin && curl -fsSL https://raw.githubusercontent.com/astronomer/astro-cli/main/godownloader.sh | sh -s -- -b /home/astro/.local/bin",
+    "remoteUser": "astro"
 }
