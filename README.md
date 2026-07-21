@@ -6,6 +6,8 @@ Pipeline ETL construído com **Apache Airflow** (Astro Runtime) para processar d
 
 O projeto simula um cenário real de streaming: usuários assistem filmes, interagem (curtem, avaliam, adicionam à lista), e esses eventos são registrados. O pipeline ETL orquestrado pelo Airflow:
 
+[Artigo completo sobre o projeto](https://www.reulison.com.br/blog/data-analytics/et-pipeline-postgresql-airflow "Pipeline ETL de Visualização de Filmes")
+
 1. **Cria as tabelas** dimensionais (`dim_users`, `dim_movies`) e a fato (`fact_views`) no PostgreSQL
 2. **Carrega os dados** de usuários, catálogo de filmes e eventos de visualização a partir de arquivos JSON
 3. **Cria views analíticas** para consultas prontas para dashboard (`vw_user_kpi`, `vw_genre_analysis`, `vw_daily_views`, `vw_device_analysis`, `vw_movie_popularity`, `vw_user_sessions`, `vw_age_range_analysis`)
@@ -116,4 +118,6 @@ Este projeto inclui configuração para [Dev Containers](https://code.visualstud
 
 ## Licença
 
-Este projeto é fornecido apenas para fins educacionais e de demonstração.
+Este projeto é fornecido apenas para fins educacionais e de demonstração. Integração com Dashboard Loooker Studio abaixo.
+
+![Google Looker Studio](/public/movie-views-dashboard.png)
