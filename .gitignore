@@ -2,6 +2,8 @@
 .env
 .DS_Store
 airflow_settings.yaml
+ngrok.yml
+backup.sql
 __pycache__/
 astro
 .venv

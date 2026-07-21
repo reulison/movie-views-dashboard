@@ -1,6 +1,6 @@
 # Movie Views Dashboard
 
-Pipeline ETL construído com **Apache Airflow** (Astro Runtime) para processar dados de visualização de filmes, carregá-los em um banco **PostgreSQL** e disponibilizar views analíticas para dashboards.
+Pipeline ETL construído com **Apache Airflow** (Astro Runtime) para processar dados de visualização de filmes, carregá-los em dois bancos **PostgreSQL** (local + Render) e disponibilizar views analíticas para dashboards.
 
 ## Visão Geral
 
@@ -72,17 +72,26 @@ astro dev kill
 
 ### Configuração do Banco
 
-O container do PostgreSQL é iniciado automaticamente pelo `astro dev start`. A conexão `postgres_default` é configurada via `airflow_settings.yaml` ou variável de ambiente `AIRFLOW_CONN_POSTGRES_DEFAULT`.
+O pipeline escreve em **dois bancos PostgreSQL simultaneamente**:
+
+| Conexão | Host | Banco | Finalidade |
+|---------|------|-------|------------|
+| `postgres_default` | `host.docker.internal:5432` | `postgres` | Local (iniciado pelo `astro dev start`) |
+| `postgres_render` | `dpg-d9fokfnavr4c73cmqeg0-a.virginia-postgres.render.com:5432` | `moviedata_4nln` | Render (instância remota gerenciada) |
+
+As conexões são configuradas no `airflow_settings.yaml` ou via variáveis de ambiente (`AIRFLOW_CONN_POSTGRES_DEFAULT` e `AIRFLOW_CONN_POSTGRES_RENDER`) no `.env`.
+
+> **Por que dois bancos?** O plano gratuito do Render.com apaga bancos PostgreSQL após 90 dias. Como este é apenas um projeto de estudo, não quero ter gastos em dólar com planos pagos. A solução é manter o banco local como fonte persistente e usar o Render apenas enquanto ele estiver disponível gratuitamente. Quando o banco do Render for removido, os dados continuam seguros no banco local e posso recriar a instância remota sem perder histórico.
 
 ### Executando a DAG
 
 Na UI do Airflow, ative a DAG `movie_views_etl` e clique em **Play** (execução manual). O pipeline completo:
 
-1. Cria as tabelas `dim_users`, `dim_movies` e `fact_views`
-2. Carrega dados de usuários
-3. Carrega dados do catálogo de filmes
-4. Carrega dados de visualizações
-5. Cria/atualiza as 7 views analíticas
+1. Cria as tabelas `dim_users`, `dim_movies` e `fact_views` em ambos os bancos
+2. Carrega dados de usuários em ambos os bancos
+3. Carrega dados do catálogo de filmes em ambos os bancos
+4. Carrega dados de visualizações em ambos os bancos
+5. Cria/atualiza as 7 views analíticas em ambos os bancos
 
 ## Desenvolvimento com VS Code
 

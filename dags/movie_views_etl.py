@@ -7,20 +7,20 @@ from pendulum import datetime
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "include" / "data"
 SQL_DIR = Path(__file__).resolve().parents[1] / "include" / "sql"
-PG_CONN_ID = "postgres_default"
+PG_CONN_IDS = ["postgres_default", "postgres_render"]
 
 default_args = {"owner": "Astro", "retries": 2}
 
 
-def _get_pg_hook() -> PostgresHook:
-    return PostgresHook(postgres_conn_id=PG_CONN_ID)
+def _get_pg_hooks() -> list[PostgresHook]:
+    return [PostgresHook(postgres_conn_id=cid) for cid in PG_CONN_IDS]
 
 
 def _run_sql_file(filename: str):
     path = SQL_DIR / filename
     sql = path.read_text(encoding="utf-8")
-    hook = _get_pg_hook()
-    hook.run(sql)
+    for hook in _get_pg_hooks():
+        hook.run(sql)
 
 
 @dag(
@@ -62,22 +62,22 @@ def movie_views_etl():
                 u.get("picture", {}).get("large"),
             ))
 
-        hook = _get_pg_hook()
-        conn = hook.get_conn()
-        with conn.cursor() as cur:
-            cur.execute("TRUNCATE TABLE dim_users CASCADE")
-            conn.commit()
-
-        hook.insert_rows(
-            table="dim_users",
-            rows=rows,
-            target_fields=[
-                "user_id", "full_name", "first_name", "last_name",
-                "email", "gender", "age", "country", "city",
-                "registered_date", "phone", "cell", "nationality", "picture_url",
-            ],
-            replace=False,
-        )
+        hooks = _get_pg_hooks()
+        for hook in hooks:
+            conn = hook.get_conn()
+            with conn.cursor() as cur:
+                cur.execute("TRUNCATE TABLE dim_users CASCADE")
+                conn.commit()
+            hook.insert_rows(
+                table="dim_users",
+                rows=rows,
+                target_fields=[
+                    "user_id", "full_name", "first_name", "last_name",
+                    "email", "gender", "age", "country", "city",
+                    "registered_date", "phone", "cell", "nationality", "picture_url",
+                ],
+                replace=False,
+            )
         print(f"Loaded {len(rows)} users.")
 
     @task
@@ -104,22 +104,22 @@ def movie_views_etl():
                 m.get("synopsis"),
             ))
 
-        hook = _get_pg_hook()
-        conn = hook.get_conn()
-        with conn.cursor() as cur:
-            cur.execute("TRUNCATE TABLE dim_movies CASCADE")
-            conn.commit()
-
-        hook.insert_rows(
-            table="dim_movies",
-            rows=rows,
-            target_fields=[
-                "movie_id", "title", "content_type", "release_year",
-                "genres", "director", "country", "language",
-                "imdb_rating", "cast_text", "synopsis",
-            ],
-            replace=False,
-        )
+        hooks = _get_pg_hooks()
+        for hook in hooks:
+            conn = hook.get_conn()
+            with conn.cursor() as cur:
+                cur.execute("TRUNCATE TABLE dim_movies CASCADE")
+                conn.commit()
+            hook.insert_rows(
+                table="dim_movies",
+                rows=rows,
+                target_fields=[
+                    "movie_id", "title", "content_type", "release_year",
+                    "genres", "director", "country", "language",
+                    "imdb_rating", "cast_text", "synopsis",
+                ],
+                replace=False,
+            )
         print(f"Loaded {len(rows)} movies.")
 
     @task
@@ -165,28 +165,28 @@ def movie_views_etl():
                 metrics.get("seeks_backward"),
             ))
 
-        hook = _get_pg_hook()
-        conn = hook.get_conn()
-        with conn.cursor() as cur:
-            cur.execute("TRUNCATE TABLE fact_views")
-            conn.commit()
-
-        hook.insert_rows(
-            table="fact_views",
-            rows=rows,
-            target_fields=[
-                "view_id", "user_id", "movie_id",
-                "timestamp", "date", "time",
-                "duration_seconds", "duration_minutes",
-                "view_type", "device", "browser", "platform",
-                "liked", "rating", "wishlist_added",
-                "favorite_added", "shared",
-                "session_id", "ip_address", "referrer",
-                "watch_progress", "quality",
-                "buffering_events", "seeks_forward", "seeks_backward",
-            ],
-            replace=False,
-        )
+        hooks = _get_pg_hooks()
+        for hook in hooks:
+            conn = hook.get_conn()
+            with conn.cursor() as cur:
+                cur.execute("TRUNCATE TABLE fact_views")
+                conn.commit()
+            hook.insert_rows(
+                table="fact_views",
+                rows=rows,
+                target_fields=[
+                    "view_id", "user_id", "movie_id",
+                    "timestamp", "date", "time",
+                    "duration_seconds", "duration_minutes",
+                    "view_type", "device", "browser", "platform",
+                    "liked", "rating", "wishlist_added",
+                    "favorite_added", "shared",
+                    "session_id", "ip_address", "referrer",
+                    "watch_progress", "quality",
+                    "buffering_events", "seeks_forward", "seeks_backward",
+                ],
+                replace=False,
+            )
         print(f"Loaded {len(rows)} views.")
 
     @task
