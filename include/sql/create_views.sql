@@ -95,3 +95,33 @@ SELECT
 FROM dim_users u
 JOIN fact_views fv ON u.user_id = fv.user_id
 GROUP BY u.user_id, u.full_name, fv.session_id;
+
+-- View 7: Visualizações por faixa etária
+CREATE OR REPLACE VIEW vw_age_range_analysis AS
+SELECT
+    CASE
+        WHEN u.age BETWEEN 0 AND 17 THEN '0-17'
+        WHEN u.age BETWEEN 18 AND 24 THEN '18-24'
+        WHEN u.age BETWEEN 25 AND 34 THEN '25-34'
+        WHEN u.age BETWEEN 35 AND 44 THEN '35-44'
+        WHEN u.age BETWEEN 45 AND 54 THEN '45-54'
+        WHEN u.age BETWEEN 55 AND 64 THEN '55-64'
+        WHEN u.age >= 65 THEN '65+'
+        ELSE 'Unknown'
+    END AS age_range,
+    COUNT(DISTINCT u.user_id)::INT AS total_users,
+    COUNT(DISTINCT fv.view_id)::INT AS total_views,
+    COUNT(DISTINCT fv.movie_id)::INT AS unique_movies,
+    COALESCE(ROUND(AVG(fv.duration_minutes), 2), 0) AS avg_viewing_time_minutes,
+    COALESCE(ROUND(SUM(fv.duration_minutes), 2), 0) AS total_viewing_time_minutes,
+    COALESCE(ROUND(AVG(fv.watch_progress), 2), 0) AS avg_watch_progress_pct,
+    COUNT(DISTINCT CASE WHEN fv.liked THEN fv.movie_id END)::INT AS liked_movies_count,
+    ROUND(
+        COUNT(DISTINCT CASE WHEN fv.liked THEN fv.movie_id END)::numeric
+        / NULLIF(COUNT(DISTINCT fv.view_id), 0) * 100, 2
+    ) AS like_rate_pct,
+    COUNT(DISTINCT DATE(fv.date))::INT AS total_active_days
+FROM dim_users u
+LEFT JOIN fact_views fv ON u.user_id = fv.user_id
+GROUP BY age_range
+ORDER BY MIN(u.age);

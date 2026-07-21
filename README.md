@@ -8,7 +8,7 @@ O projeto simula um cenário real de streaming: usuários assistem filmes, inter
 
 1. **Cria as tabelas** dimensionais (`dim_users`, `dim_movies`) e a fato (`fact_views`) no PostgreSQL
 2. **Carrega os dados** de usuários, catálogo de filmes e eventos de visualização a partir de arquivos JSON
-3. **Cria views analíticas** para consultas prontas para dashboard (`vw_user_kpi`, `vw_genre_analysis`, `vw_daily_views`, `vw_device_analysis`, `vw_movie_popularity`, `vw_user_sessions`)
+3. **Cria views analíticas** para consultas prontas para dashboard (`vw_user_kpi`, `vw_genre_analysis`, `vw_daily_views`, `vw_device_analysis`, `vw_movie_popularity`, `vw_user_sessions`, `vw_age_range_analysis`)
 
 ## Estrutura do Projeto
 
@@ -24,10 +24,7 @@ O projeto simula um cenário real de streaming: usuários assistem filmes, inter
 │   └── sql/
 │       ├── create_tables.sql     # DDL das tabelas
 │       └── create_views.sql      # DDL das views analíticas
-├── data/                         # Cópia dos dados (referência)
-├── tests/
-│   └── dags/
-│       └── test_dag_example.py
+├── tests/                        # Testes automatizados
 ├── .devcontainer/
 │   └── devcontainer.json         # Configuração do Dev Container
 ├── Dockerfile                    # Imagem Astro Runtime
@@ -83,7 +80,7 @@ Na UI do Airflow, ative a DAG `movie_views_etl` e clique em **Play** (execução
 2. Carrega dados de usuários
 3. Carrega dados do catálogo de filmes
 4. Carrega dados de visualizações
-5. Cria/atualiza as 6 views analíticas
+5. Cria/atualiza as 7 views analíticas
 
 ## Desenvolvimento com VS Code
 
@@ -115,6 +112,7 @@ Este projeto inclui configuração para [Dev Containers](https://code.visualstud
 | `vw_device_analysis` | Métricas por dispositivo / plataforma / navegador |
 | `vw_movie_popularity` | Popularidade dos filmes (visualizações, likes, progresso médio) |
 | `vw_user_sessions` | Sessões de visualização por usuário |
+| `vw_age_range_analysis` | Visualizações agregadas por faixa etária |
 
 ## Licença
 
